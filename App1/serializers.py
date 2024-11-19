@@ -4,7 +4,7 @@ from .models import FoodItem, FoodWithImage
 class FoodItemSerializers(serializers.ModelSerializer):
     class Meta:
         model=FoodItem
-        fields=['id','name','price','description']
+        fields=['id','owner','name','price','description']
 
 
 class FoodWithImageSerializers(serializers.ModelSerializer):

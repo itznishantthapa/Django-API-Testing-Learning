@@ -4,18 +4,25 @@ from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from .serializers import FoodItemSerializers , FoodWithImageSerializers
 from .models import FoodItem
+# from django.contrib.auth.models import User
 
 @csrf_exempt
 @api_view(['POST','GET','PUT','DELETE'])
 def createFoodItem(request,pk=None):
     if request.method == 'POST':
-        serializer=FoodItemSerializers(data=request.data)
+        owner = request.user.owner
+        request.data['owner'] = owner.id  
+        
+        # Create the food item using the serializer
+        serializer = FoodItemSerializers(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-        return Response({"data":serializer.data,"msg":"Food Item Created Successfully"},status=200)
-    
+            serializer.save()  # Save the food item
+            return Response({"data": serializer.data, "msg": "Food Item Created Successfully"}, status=201)
+        return Response({"msg": "Invalid Data", "errors": serializer.errors}, status=400)
+        
     elif request.method == 'GET':
-        food_items=FoodItem.objects.all()
+        owner = request.user.owner
+        food_items=FoodItem.objects.filter(owner=owner)
         serializer=FoodItemSerializers(food_items,many=True)
         return Response({"data":serializer.data,"msg":"Food Items Fetched Successfully"},status=200)
     
